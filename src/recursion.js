@@ -474,7 +474,16 @@ var flatten = function (array) {
 
 // 31. Given a string, return an object containing tallies of each letter.
 // letterTally('potato'); // {p:1, o:2, t:2, a:1}
-var letterTally = function (str, obj) {
+var letterTally = function (str, obj = {}) {
+  if (!str.length) {
+    return obj;
+  }
+  if (str[0] in obj) {
+    obj[str[0]]++;
+  } else {
+    obj[str[0]] = 1;
+  }
+  return letterTally(str.slice(1), obj);
 };
 
 // 32. Eliminate consecutive duplicates in a list. If the list contains repeated
@@ -483,18 +492,44 @@ var letterTally = function (str, obj) {
 // compress([1,2,2,3,4,4,5,5,5]) // [1,2,3,4,5]
 // compress([1,2,2,3,4,4,2,5,5,5,4,4]) // [1,2,3,4,2,5,4]
 var compress = function (list) {
+  var arr = [];
+  if (list.length === 0) {
+    return arr;
+  }
+  if (list.length === 1) {
+    arr.push(list[0]);
+    return arr;
+  }
+  if (list[0] !== list[1]) {
+    arr.push(list[0]);
+  }
+  return arr.concat(compress(list.slice(1)));
 };
 
 // 33. Augment every element in a list with a new value where each element is an array
 // itself.
 // augmentElements([[],[3],[7]], 5); // [[5],[3,5],[7,5]]
 var augmentElements = function (array, aug) {
+  if (!array.length) {
+    return array;
+  }
+  array[0].push(aug);
+  augmentElements(array.slice(1), aug);
+  return array;
 };
 
 // 34. Reduce a series of zeroes to a single 0.
 // minimizeZeroes([2,0,0,0,1,4]) // [2,0,1,4]
 // minimizeZeroes([2,0,0,0,1,0,0,4]) // [2,0,1,0,4]
 var minimizeZeroes = function (array) {
+  var newArr = [];
+  if (!array.length) {
+    return newArr;
+  }
+  if (array[0] !== 0 || array[0] !== array[1]) {
+    newArr.push(array[0]);
+  }
+  return newArr.concat(minimizeZeroes(array.slice(1)));
 };
 
 // 35. Alternate the numbers in an array between positive and negative regardless of
@@ -502,33 +537,119 @@ var minimizeZeroes = function (array) {
 // alternateSign([2,7,8,3,1,4]) // [2,-7,8,-3,1,-4]
 // alternateSign([-2,-7,8,3,-1,4]) // [2,-7,8,-3,1,-4]
 var alternateSign = function (array) {
+  if (!array.length) {
+    return array;
+  }
+  if (array[0] < 0) {
+    array[0] = -array[0];
+  }
+  if (array[1] > 0) {
+    array[1] = -array[1];
+  }
+  return [array[0], array[1]].concat(alternateSign(array.slice(2)));
 };
+
 
 // 36. Given a string, return a string with digits converted to their word equivalent.
 // Assume all numbers are single digits (less than 10).
 // numToText("I have 5 dogs and 6 ponies"); // "I have five dogs and six ponies"
 var numToText = function (str) {
+  var myObj = {
+    1: 'one',
+    2: 'two',
+    3: 'three',
+    4: 'four',
+    5: 'five',
+    6: 'six',
+    7: 'seven',
+    8: 'eight',
+    9: 'nine',
+    0: 'zero'
+  };
+  var result = "";
+  if (!str) {
+    return result;
+  }
+  var curChar = str[0];
+  if (myObj[curChar]) {
+    result += myObj[curChar];
+  }
+  else {
+    result += curChar;
+  }
+  return result + numToText(str.slice(1));
 };
 
 
 // *** EXTRA CREDIT ***
 
 // 37. Return the number of times a tag occurs in the DOM.
-var tagCount = function (tag, node) {
+var tagCount = function (tag, node = document.documentElement) {
+  var count = 0;
+  if (node.childNodes) {
+    if (node.childNodes.length === 0) return 0;
+    if (node.childNodes.length > 0) {
+      node.childNodes.forEach(firstLevelChild => {
+        if (firstLevelChild.nodeName === tag.toUpperCase()) {
+          count++;
+        }
+        if (firstLevelChild.childNodes.length > 0) {
+          count += tagCount(tag, firstLevelChild);
+        }
+      });
+    }
+  }
+  return count;
 };
 
 // 38. Write a function for binary search.
 // var array = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
 // binarySearch(array, 5) // 5
 // https://www.khanacademy.org/computing/computer-science/algorithms/binary-search/a/binary-search
-var binarySearch = function (array, target, min, max) {
+var binarySearch = function (array, target, min = 0, max = array.length - 1) {
+  var guess = Math.floor((min + max) / 2);
+  if (max < min) {
+    return null;
+  }
+  if (array[guess] === target) {
+    return guess;
+  }
+  if (array[guess] < target) {
+    return binarySearch(array, target, guess + 1, max);
+  }
+  if (array[guess] > target) {
+    return binarySearch(array, target, min, guess - 1);
+  }
 };
 
 // 39. Write a merge sort function.
 // mergeSort([34,7,23,32,5,62]) // [5,7,23,32,34,62]
 // https://www.khanacademy.org/computing/computer-science/algorithms/merge-sort/a/divide-and-conquer-algorithms
 var mergeSort = function (array) {
+  if (array.length <= 1) {
+    return array;
+  }
+
+  const mid = Math.floor(array.length / 2);
+  let arrA = mergeSort(array.slice(0, mid));
+  let arrB = mergeSort(array.slice(mid, array.length));
+
+  return merge(arrA, arrB);
 };
+
+function merge(arrA, arrB) {
+  const result = [];
+  let i = 0;
+  let j = 0;
+  while (i < arrA.length && j < arrB.length) {
+    if (arrA[i] < arrB[j]) {
+      result.push(arrA[i++]);
+    } else {
+      result.push(arrB[j++]);
+    }
+  }
+  return result.concat(arrA.slice(i)).concat(arrB.slice(j));
+}
 
 // 40. Deeply clone objects and arrays.
 // var obj1 = {a:1,b:{bb:{bbb:2}},c:3};
@@ -536,4 +657,28 @@ var mergeSort = function (array) {
 // console.log(obj2); // {a:1,b:{bb:{bbb:2}},c:3}
 // obj1 === obj2 // false
 var clone = function (input) {
+  if (typeof input === 'object') {
+    if (input === null) return {};
+    var result = {};
+    for (var key in input) {
+      var value = input[key];
+      if (typeof value === 'object') {
+        result[key] = clone(value);
+      } else {
+        result[key] = value;
+      }
+    }
+  }
+  if (Array.isArray(input)) {
+    if (input.length === 0) return [];
+    var result = [];
+    input.forEach(key => {
+      if (typeof key === 'object') {
+        result.push(clone(key));
+      } else {
+        result.push(key);
+      }
+    })
+  }
+  return result;
 };
