@@ -265,24 +265,63 @@ var buildList = function (value, length) {
 // For numbers which are multiples of both three and five, output “FizzBuzz” instead of the number.
 // fizzBuzz(5) // ['1','2','Fizz','4','Buzz']
 var fizzBuzz = function (n) {
+  var arr = [];
+  if (n === 0) return arr;
+
+  if (n % 3 === 0 && n % 5 === 0) {
+    arr.push('FizzBuzz');
+  } else if (n % 3 === 0) {
+    arr.push('Fizz');
+  } else if (n % 5 === 0) {
+    arr.push('Buzz');
+  } else {
+    arr.push('' + n);
+  }
+  return fizzBuzz(n - 1).concat(arr);
 };
 
 // 20. Count the occurence of a value in a list.
 // countOccurrence([2,7,4,4,1,4], 4) // 3
 // countOccurrence([2,'banana',4,4,1,'banana'], 'banana') // 2
 var countOccurrence = function (array, value) {
+  var count = 0;
+  if (array.length !== 0) {
+    if (array[0] === value) {
+      count++;
+    }
+    count += countOccurrence(array.slice(1), value);
+  }
+  return count;
 };
 
 // 21. Write a recursive version of map.
 // rMap([1,2,3], timesTwo); // [2,4,6]
 var rMap = function (array, callback) {
+  var newArray = [];
+  if (!array.length) {
+    return newArray;
+  }
+  newArray.push(callback(array[0]));
+  return newArray.concat(rMap(array.slice(1), callback));
 };
+
 
 // 22. Write a function that counts the number of times a key occurs in an object.
 // var obj = {'e':{'x':'y'},'t':{'r':{'e':'r'},'p':{'y':'r'}},'y':'e'};
 // countKeysInObj(obj, 'r') // 1
 // countKeysInObj(obj, 'e') // 2
 var countKeysInObj = function (obj, key) {
+  var count = 0;
+  for (var prop in obj) {
+    var item = obj[prop];
+    if (prop === key) {
+      count++;
+    }
+    if (typeof item === 'object') {
+      count += countKeysInObj(item, key);
+    }
+  }
+  return count
 };
 
 // 23. Write a function that counts the number of times a value occurs in an object.
@@ -290,11 +329,36 @@ var countKeysInObj = function (obj, key) {
 // countValuesInObj(obj, 'r') // 2
 // countValuesInObj(obj, 'e') // 1
 var countValuesInObj = function (obj, value) {
+  var count = 0;
+  for (var prop in obj) {
+    var item = obj[prop];
+    if (obj[prop] === value) {
+      count++;
+    }
+    if (typeof item === 'object') {
+      count += countValuesInObj(item, value);
+    }
+  }
+  return count
 };
 
 // 24. Find all keys in an object (and nested objects) by a provided name and rename
 // them to a provided new name while preserving the value stored at that key.
+// var obj = { 'e': { 'x': 'y' }, 't': { 'r': { 'e': 'r' }, 'p': { 'y': 'r' } }, 'y': 'e' };
+// replaceKeysInObj(obj, 'e', 'm');
+
 var replaceKeysInObj = function (obj, oldKey, newKey) {
+  for (var key in obj) {
+    var value = obj[key];
+    if (key === oldKey) {
+      obj[newKey] = value;
+      delete obj[oldKey];
+    }
+    if (typeof value === 'object') {
+      value = replaceKeysInObj(value, oldKey, newKey);
+    }
+  }
+  return obj;
 };
 
 // 25. Get the first n Fibonacci numbers. In the Fibonacci sequence, each subsequent
@@ -303,6 +367,16 @@ var replaceKeysInObj = function (obj, oldKey, newKey) {
 // fibonacci(5); // [0,1,1,2,3,5]
 // Note: The 0 is not counted.
 var fibonacci = function (n) {
+  if (n <= 0) {
+    return null;
+  }
+  if (n === 1) {
+    return [0, 1];
+  }
+  var fib = fibonacci(n - 1);
+  fib.push(fib[fib.length - 1] + fib[fib.length - 2]);
+  return fib;
+
 };
 
 // 26. Return the Fibonacci number located at index n of the Fibonacci sequence.
@@ -310,36 +384,93 @@ var fibonacci = function (n) {
 // nthFibo(5); // 5
 // nthFibo(7); // 13
 // nthFibo(3); // 2
+
+//using memoization
 var nthFibo = function (n) {
-};
+  if (n < 0) {
+    return null;
+  }
+
+  var mem = {};
+  if (mem[n] === undefined) {
+    if (n < 2) {
+      mem[n] = n;
+    }
+    else {
+      mem[n] = nthFibo(n - 2) + nthFibo(n - 1);
+    }
+  }
+  return mem[n];
+}
+
+//naive algorithm
+var nthFibo = function (n) {
+  if (n < 0) {
+    return null;
+  }
+  return n <= 1 ? n : nthFibo(n - 1) + nthFibo(n - 2);
+}
 
 // 27. Given an array of words, return a new array containing each word capitalized.
 // var words = ['i', 'am', 'learning', 'recursion'];
 // capitalizedWords(words); // ['I', 'AM', 'LEARNING', 'RECURSION']
 var capitalizeWords = function (array) {
+  var newArr = [];
+  newArr.push(array[0].toUpperCase());
+  if (array.length > 1) {
+    return newArr.concat(capitalizeWords(array.slice(1)));
+  }
+  return newArr;
 };
 
 // 28. Given an array of strings, capitalize the first letter of each index.
 // capitalizeFirst(['car','poop','banana']); // ['Car','Poop','Banana']
 var capitalizeFirst = function (array) {
+  var newArr = [];
+  newArr.push((array[0][0].toUpperCase()) + array[0].slice(1));
+  if (array.length > 1) {
+    return newArr.concat(capitalizeFirst(array.slice(1)));
+  }
+  return newArr;
 };
 
 // 29. Return the sum of all even numbers in an object containing nested objects.
 // var obj1 = {
 //   a: 2,
-//   b: {b: 2, bb: {b: 3, bb: {b: 2}}},
-//   c: {c: {c: 2}, cc: 'ball', ccc: 5},
+//   b: { b: 2, bb: { b: 3, bb: { b: 2 } } },
+//   c: { c: { c: 2 }, cc: 'ball', ccc: 5 },
 //   d: 1,
-//   e: {e: {e: 2}, ee: 'car'}
+//   e: { e: { e: 2 }, ee: 'car' }
 // };
 // nestedEvenSum(obj1); // 10
 var nestedEvenSum = function (obj) {
+  var sum = 0;
+  for (var key in obj) {
+    var item = obj[key];
+    if (typeof item === 'number' && item % 2 === 0) {
+      sum += item;
+    }
+    if (typeof item === 'object') {
+      sum += nestedEvenSum(item);
+    }
+  }
+  return sum;
 };
 
 // 30. Flatten an array containing nested arrays.
 // flatten([1,[2],[3,[[4]]],5]); // [1,2,3,4,5]
 var flatten = function (array) {
+  var newArr = [];
+  for (var i = 0; i < array.length; i++) {
+    if (Array.isArray(array[i])) {
+      newArr = newArr.concat(flatten(array[i]));
+    } else {
+      newArr.push(array[i]);
+    }
+  }
+  return newArr;
 };
+
 
 // 31. Given a string, return an object containing tallies of each letter.
 // letterTally('potato'); // {p:1, o:2, t:2, a:1}
